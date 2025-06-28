@@ -1,0 +1,42 @@
+- name: callisto-ec-chain
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url: postgresql://pguser:pgpassword@postgres_ec_chain/callisto-ec-chain
+      isolation_level: read-committed
+      use_prepared_statements: false
+  logical_models:
+    - fields:
+        - name: value_text_type
+          type:
+            nullable: true
+            scalar: text
+        - name: value_num_type
+          type:
+            nullable: true
+            scalar: bigint
+      name: echo_res
+    - fields:
+        - name: type
+          type:
+            nullable: true
+            scalar: text
+      name: key_type_res
+  native_queries:
+    - arguments:
+        value:
+          description: ""
+          nullable: false
+          type: text
+      code: "select {{value}}::TEXT as value_text_type,\nCASE \n    WHEN {{value}} ~ '^\\d+$' THEN  {{value}}::bigint\n    else null\nend as value_num_type;"
+      returns: echo_res
+      root_field_name: echo
+    - arguments:
+        key:
+          description: ""
+          nullable: false
+          type: text
+      code: "SELECT \r\n  -- 判断key是否存在\r\n  CASE \r\n    WHEN {{key}} ~ '^\\d+$' and EXISTS (SELECT 1 FROM block b WHERE b.height = {{key}}::bigint ) THEN 'block'\r\n    WHEN EXISTS (SELECT 1 FROM block b WHERE b.hash = {{key}} ) THEN 'block'\r\n    WHEN EXISTS (SELECT 1 FROM \"transaction\"  t WHERE t.hash = {{key}} ) THEN 'transition'\r\n        WHEN EXISTS (SELECT 1 FROM module_accounts ma WHERE ma.address  = {{key}}) THEN 'module_account'\r\n    WHEN EXISTS (SELECT 1 FROM account a WHERE a.address = {{key}}) THEN 'account'\r\n    ELSE NULL\r\n  END AS type;"
+      returns: key_type_res
+      root_field_name: existence_check
+  tables: "!include callisto-ec-chain/tables/tables.yaml"

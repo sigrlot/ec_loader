@@ -1,0 +1,59 @@
+table:
+  name: block
+  schema: public
+object_relationships:
+  - name: gas_fee
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: block_gas_fee
+          schema: public
+  - name: raw_log
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: raw_block_log_view
+          schema: public
+  - name: validator_description
+    using:
+      manual_configuration:
+        column_mapping:
+          proposer_address: validator_address
+        insertion_order: null
+        remote_table:
+          name: validator_description
+          schema: public
+  - name: validator_info
+    using:
+      manual_configuration:
+        column_mapping:
+          proposer_address: consensus_address
+        insertion_order: null
+        remote_table:
+          name: validator_info
+          schema: public
+array_relationships:
+  - name: module_account_transfer_msgs
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: module_account_transfers
+          schema: public
+  - name: transactions
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: transaction
+          schema: public

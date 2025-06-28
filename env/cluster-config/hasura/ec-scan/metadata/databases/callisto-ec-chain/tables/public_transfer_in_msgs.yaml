@@ -1,0 +1,13 @@
+table:
+  name: transfer_in_msgs
+  schema: public
+object_relationships:
+  - name: belong_block
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: block
+          schema: public

@@ -1,0 +1,3 @@
+table:
+  name: amount_in_tx_view
+  schema: public

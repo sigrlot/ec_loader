@@ -1,0 +1,79 @@
+table:
+  name: transaction
+  schema: public
+object_relationships:
+  - name: block
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: block
+          schema: public
+  - name: gas_fee
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+          partition_id: partition_id
+        insertion_order: null
+        remote_table:
+          name: fee_records
+          schema: public
+  - name: total_amount
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+        insertion_order: null
+        remote_table:
+          name: amount_in_tx_view
+          schema: public
+  - name: tx_signers
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+        insertion_order: null
+        remote_table:
+          name: tx_signers
+          schema: public
+array_relationships:
+  - name: msgs
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: transaction_hash
+          partition_id: partition_id
+        insertion_order: null
+        remote_table:
+          name: message
+          schema: public
+  - name: parsed_message
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+        insertion_order: null
+        remote_table:
+          name: parsed_message
+          schema: public
+  - name: transfer
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+        insertion_order: null
+        remote_table:
+          name: transfer_in_msgs
+          schema: public
+  - name: transfer_split_coin_str
+    using:
+      manual_configuration:
+        column_mapping:
+          hash: tx_hash
+        insertion_order: null
+        remote_table:
+          name: transfer_in_msgs_split_uec_coin_view
+          schema: public

@@ -1,0 +1,3 @@
+table:
+  name: module_accounts
+  schema: public

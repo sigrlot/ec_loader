@@ -1,0 +1,19 @@
+{
+    "metadata": {
+        "version": 125,
+        "restEndpoints": {
+            "blocklist": {
+                "methods": [
+                    "GET"
+                ],
+                "cacheSecond": "5"
+            },
+            "txs/hub/list": {
+                "methods": [
+                    "GET"
+                ],
+                "cacheSecond": "5"
+            }
+        }
+    }
+}

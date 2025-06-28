@@ -1,0 +1,13 @@
+table:
+  name: module_account_transfers
+  schema: public
+object_relationships:
+  - name: block
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: block
+          schema: public

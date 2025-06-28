@@ -1,0 +1,22 @@
+table:
+  name: parsed_message
+  schema: public
+object_relationships:
+  - name: block
+    using:
+      manual_configuration:
+        column_mapping:
+          height: height
+        insertion_order: null
+        remote_table:
+          name: block
+          schema: public
+  - name: transaction
+    using:
+      manual_configuration:
+        column_mapping:
+          tx_hash: hash
+        insertion_order: null
+        remote_table:
+          name: transaction
+          schema: public

@@ -1,0 +1,155 @@
+- comment: 查询账户详情
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: account.detail
+  methods:
+    - GET
+  name: account.detail
+  url: account/detail
+- comment: 查询全量模块化地址（无分页）
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: account.module.addresses
+  methods:
+    - GET
+  name: account.module.addresses
+  url: account/module/addresses
+- comment: 查询账户权益变更记录
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: account.staking_records
+  methods:
+    - GET
+  name: account.staking_records
+  url: account/staking_records
+- comment: "同时支持使用post或get查询\n查询指定高度或hash的区块\n参数：二者选其一\nhash: 区块hash\nheight:区块高度\n如果hash和height都是有效值时，则可能返回两个区块，当二者都指向一个区块时，则返回一个区块\n  \n**"
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: block.detail
+  methods:
+    - GET
+    - POST
+  name: block.detail
+  url: block/detail
+- comment: "@author james  \n----\n# 查询指定区块高度里发生的模块账户转账信息\n\n- 返回示例\n``` json\n{\n    \"module_account_transfers\": [\n      {\n        \"from_address\": \"me1m3h30wlvsf8llruxtpukdvsy0km2kum8mz239h\",\n        \"to_address\": \"me1quarn305vjusjaqxzdm8du09w63gjx3602z5zh\",\n        \"amount\": \"79274480000uec\",\n        \"tx_hash\": null,\n        \"type\": \"mint\",\n        \"msg_index\": null\n      },\n      {\n        \"from_address\": \"me1m3h30wlvsf8llruxtpukdvsy0km2kum8mz239h\",\n        \"to_address\": \"me1quarn305vjusjaqxzdm8du09w63gjx3602z5zh\",\n        \"amount\": \"79274480000uec\",\n        \"tx_hash\": null,\n        \"type\": \"transfer_in_abci\",\n        \"msg_index\": null\n      }\n    ],\n    \"module_account_transfers_aggregate\": {\n      \"aggregate\": {\n        \"count\": 2\n      }\n    }\n  }\n```\n\n**\n-----"
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: block.module.transfers
+  methods:
+    - POST
+  name: block.module.transfers
+  url: block/module/transfers
+- comment: 查询区块原始日志
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: block.raw_log
+  methods:
+    - GET
+  name: block.raw_log
+  url: block/raw_log
+- comment: 查询指定区块高度的交易列表
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: block.txs
+  methods:
+    - GET
+  name: block.txs
+  url: block/txs
+- comment: 查询流通量信息
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: home.liquidity_info
+  methods:
+    - GET
+  name: home.liquidity_info
+  url: home/liquidity_info
+- comment: |-
+    ## 查询所输入key是否存在
+    ### 返回的字段包含以下类型
+    - block
+    - transition
+    - account
+    - module_account
+    - null
+    -----
+    **
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: home.query_exists
+  methods:
+    - GET
+  name: home.query_exists
+  url: home/query_exists
+- comment: "查询指定地址在指定交易中的资产变化\n\n返回结果示例 \n\n``` json\n{\n    \"asset_change_logs\": [\n      {\n        \"address\": \"me1ja4vgnavpdllv2dpg5yc55j5gl5l4k0lrk60n8\",\n        \"before_change\": [\n          {\n            \"denom\": \"uec\",\n            \"amount\": 0\n          }\n        ],\n        \"change\": [\n          {\n            \"denom\": \"uec\",\n            \"amount\": 1\n          }\n        ],\n        \"after_change\": [\n          {\n            \"denom\": \"uec\",\n            \"amount\": 1\n          }\n        ],\n        \"height\": 2599,\n        \"tx_hash\": \"B679A8ED53E6151A7AA4F186DD0A2021637BCCDD0D606072B2BE63E05E7B7F0B\",\n        \"trigger_by\": \"{cosmos.bank.v1beta1.MsgSend}\"\n      }\n    ]\n  }\n```\n\n--"
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: tx.asset_change_log
+  methods:
+    - GET
+  name: tx.asset_change_log
+  url: tx/asset_change_log
+- comment: 查询交易详情
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: tx.detail
+  methods:
+    - GET
+  name: tx.detail
+  url: tx/detail
+- comment: "查询交易详情\n  \n**"
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: tx.detail_with_address
+  methods:
+    - GET
+    - POST
+  name: tx.detail_with_address
+  url: tx/detail_with_address
+- comment: 查询交易的原始日志
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: tx.raw_log
+  methods:
+    - GET
+  name: tx.raw_log
+  url: tx/raw_log
+- comment: 验证节点区块列表
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: validator.blocks
+  methods:
+    - GET
+  name: validator.blocks
+  url: validator/blocks
+- comment: 查询验证节点详情
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: validator.detail
+  methods:
+    - GET
+  name: validator.detail
+  url: validator/detail
+- comment: 验证节点列表数量，平均出块速度和最新区块高度
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: validator.statistic
+  methods:
+    - GET
+  name: validator.statistic
+  url: validator/statistic

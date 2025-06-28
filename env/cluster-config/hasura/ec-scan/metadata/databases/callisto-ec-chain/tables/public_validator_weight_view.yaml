@@ -1,0 +1,3 @@
+table:
+  name: validator_weight_view
+  schema: public

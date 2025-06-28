@@ -1,0 +1,13 @@
+table:
+  name: balance_states
+  schema: public
+object_relationships:
+  - name: staking
+    using:
+      manual_configuration:
+        column_mapping:
+          address: staker_address
+        insertion_order: null
+        remote_table:
+          name: stake_ec_statics
+          schema: public

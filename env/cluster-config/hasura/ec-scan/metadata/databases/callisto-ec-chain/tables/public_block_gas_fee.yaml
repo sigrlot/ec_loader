@@ -1,0 +1,3 @@
+table:
+  name: block_gas_fee
+  schema: public

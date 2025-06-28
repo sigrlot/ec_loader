@@ -1,0 +1,13 @@
+table:
+  name: stake_info_records
+  schema: public
+object_relationships:
+  - name: block
+    using:
+      manual_configuration:
+        column_mapping:
+          block_height: height
+        insertion_order: null
+        remote_table:
+          name: block
+          schema: public

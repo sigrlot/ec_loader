@@ -1,0 +1,3 @@
+table:
+  name: asset_change_logs_view
+  schema: public

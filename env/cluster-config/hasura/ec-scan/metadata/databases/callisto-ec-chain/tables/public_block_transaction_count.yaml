@@ -1,0 +1,3 @@
+table:
+  name: block_transaction_count
+  schema: public

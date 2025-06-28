@@ -1,0 +1,3 @@
+table:
+  name: liquidity_info_view
+  schema: public

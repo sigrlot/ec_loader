@@ -1,0 +1,273 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: block.txs
+        query: |
+          query block_txs ($height: bigint, $offset: Int = 0, $limit: Int = 10) {
+            txs: transaction(where: {height:{_eq:$height}}, offset: $offset, limit: $limit) {
+              hash
+              success
+              msgs {
+                type
+              }
+              total_amount {
+                total_coins
+              }
+              gas_fee {
+                fee_amount
+                fee_denom
+                fee_payer
+              }
+            }
+            count: transaction_aggregate(where: {height:{_eq:$height}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: block.raw_log
+        query: |
+          query block_raw_log ($height: bigint!) {
+            raw_log: raw_block_log_view(where: {height:{_eq:$height}}) {
+              block
+              block_reusult: log
+            }
+          }
+      - name: tx.detail_with_address
+        query: |
+          query detail_with_address ($hash: String = "", $msg_with_address: [String!] = []) {
+            transaction(where: {hash:{_eq:$hash}}) {
+              height
+              hash
+              success
+              tx_signers {
+                address: fee_payer
+              }
+              memo
+              gas_wanted
+              gas_used
+              gas_fee {
+                fee_amount
+                fee_denom
+              }
+              block {
+                timestamp
+              }
+              msgs(where: {involved_accounts_addresses:{_contains:$msg_with_address}}) {
+                index
+                type
+                body: value
+                parsed_message {
+                  description
+                  detail
+                }
+              }
+            }
+          }
+      - name: block.module.transfers
+        query: |
+          query module_transfer_in_block ($height: bigint!, $limit: Int = 10, $offset: Int = 0) {
+            transfers: module_account_transfers(limit: $limit, where: {height:{_eq:$height}}, offset: $offset) {
+              from_address
+              to_address
+              amount
+              tx_hash
+              type
+              msg_index
+              tag
+            }
+            count: module_account_transfers_aggregate(where: {height:{_eq:$height}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: tx.asset_change_log
+        query: |
+          query asset_change_log ($address: String!, $tx_hash: String!) {
+            asset_change_logs: asset_change_logs_view(where: {address:{_eq:$address},tx_hash:{_eq:$tx_hash}}) {
+              address
+              before_change
+              change
+              after_change
+              height
+              tx_hash
+              trigger_by
+            }
+          }
+      - name: tx.raw_log
+        query: |
+          query tx_rawlog ($hash: String = "") {
+            transaction(where: {hash:{_eq:$hash}}) {
+              hash
+              height
+              raw_log
+            }
+          }
+      - name: home.liquidity_info
+        query: |
+          query liquidity_info {
+            liquiditys: liquidity_info_view {
+              name
+              uec_amount
+            }
+          }
+      - name: tx.detail
+        query: |
+          query tx_detail ($hash: String = "") {
+            transaction(where: {hash:{_eq:$hash}}) {
+              height
+              hash
+              success
+              tx_signers {
+                address: fee_payer
+              }
+              memo
+              gas_wanted
+              gas_used
+              gas_limit: fee(path: "gas_limit")
+              gas_fee {
+                fee_amount
+                fee_denom
+                receivers
+              }
+              time: block {
+                timestamp
+              }
+              msgs {
+                index
+                type
+                body: value
+                parsed_message {
+                  description
+                  detail
+                }
+              }
+            }
+          }
+      - name: account.module.addresses
+        query: |
+          query get_module_accounts {
+            module_accounts {
+              name
+              address
+              account_type
+              description
+            }
+          }
+      - name: home.query_exists
+        query: |
+          query queryKey ($key: String!) {
+            existence_check(args: {key:$key}) {
+              type
+            }
+          }
+      - name: block.detail
+        query: |
+          query block_detail ($height: bigint! = "0", $hash: String = "") {
+            block(where: {_or:[{height:{_eq:$height}},{hash:{_eq:$hash}}]}) {
+              height
+              num_txs
+              timestamp
+              total_gas
+              hash
+              proposer_address
+              validator_info {
+                operator_address
+                consensus_address
+                descrition {
+                  moniker
+                }
+              }
+            }
+          }
+      - name: validator.statistic
+        query: |
+          query validator_statistic {
+            validator_status {
+              status
+              validator_address
+              validator_info {
+                operator_address
+              }
+              validator_desc {
+                name: moniker
+              }
+            }
+            block(limit: 1, order_by: {height:desc}) {
+              height
+            }
+            validator_status_aggregate {
+              aggregate {
+                count
+              }
+            }
+            echo(args: {value:"3s"}) {
+              average_block_time: value_text_type
+            }
+          }
+      - name: validator.detail
+        query: |
+          query validator_detail ($validator_address: String!) {
+            validator_status(where: {validator_address:{_eq:$validator_address}}) {
+              status
+              validator_address
+              validator_info {
+                operator_address
+              }
+              validator_desc {
+                name: moniker
+              }
+            }
+          }
+      - name: validator.blocks
+        query: |
+          query node_blocks ($validator_address: String!, $limit: Int = 10, $offset: Int = 0) {
+            block(where: {proposer_address:{_eq:$validator_address}}, limit: $limit, offset: $offset, order_by: {height:desc}) {
+              hash
+              height
+              total_gas
+              timestamp
+              proposer_address
+              num_txs
+              gas_fee {
+                total_fee
+                fee_denom
+              }
+            }
+            block_aggregate(where: {proposer_address:{_eq:$validator_address}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: account.staking_records
+        query: |
+          query staking_records ($address: String, $limit: Int = 10, $offset: Int = 0) {
+            records: stake_info_records(where: {staker_address:{_eq:$address}}, limit: $limit, offset: $offset, order_by: {block_height:desc}) {
+              staker_address
+              msg_type
+              amount
+              height: block_height
+              block {
+                timestamp
+              }
+            }
+            count: stake_info_records_aggregate(where: {staker_address:{_eq:$address}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: account.detail
+        query: |
+          query account_detail ($address: String!) {
+            balance_states(where: {address:{_eq:$address}}) {
+              address
+              account_types
+              uec_amount
+              staking {
+                amount
+              }
+            }
+          }

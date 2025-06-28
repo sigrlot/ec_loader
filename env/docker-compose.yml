@@ -1,0 +1,143 @@
+services:
+  redis:
+    image: 192.168.0.79/metaearth/redis:latest
+    deploy:
+      replicas: 1
+    #    command: >
+    #      redis-server --user rduser --requirepass rdpasswd
+    ports:
+      - "6379:6379"
+    networks:
+      - app-net
+
+  # Explorer for the meta-earth v2.0
+  explorer:
+    image: 192.168.0.79/ec-chain/ec-scan:v0.0.1-rc10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 300s
+    ports:
+      - "8000:8000"
+    configs:
+      - source: scan-cfg
+        target: /data/conf/config.yaml
+      - source: scan-proxy-api
+        target: /data/conf/apis.json
+    networks:
+      - app-net
+    command: ["./scan", "--conf", "/data/conf", "--api-conf", "/data/conf"]
+
+  hasura:
+    image: 192.168.0.79/metaearth/hasura/graphql-engine:v2.42.0
+    deploy:
+      replicas: 1
+    environment:
+      # HASURA_GRAPHQL_DATABASE_URL: postgres://pguser:pgpassword@postgres:5432/me-scan
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://pguser:pgpassword@postgres:5432/ec-scan
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      # HASURA_GRAPHQL_ADMIN_SECRET: "hspassword"
+    ports:
+      - "8080:8080"
+    networks:
+      - app-net
+    depends_on:
+      - data-connector
+
+  # GraphQL engine, enable Hasura to access different data sources through graphql
+  data-connector:
+    image: 192.168.0.79/metaearth/hasura/graphql-data-connector:v2.42.0
+    ports:
+      - "8081:8081"
+    environment:
+      QUARKUS_LOG_LEVEL: ERROR
+      QUARKUS_OPENTELEMETRY_ENABLED: "false"
+    networks:
+      - app-net
+
+  # hasura postgres
+  postgres:
+    image: 192.168.0.79/metaearth/postgres:15
+    deploy:
+      replicas: 1
+    environment:
+      POSTGRES_USER: pguser # initial user
+      POSTGRES_PASSWORD: pgpassword # initial password
+      POSTGRES_DB: ec-scan # initial db
+    ports:
+      - "5432:5432"
+    volumes:
+      - type: volume
+        source: pgdata
+        target: /var/lib/postgresql/data # for data persistence
+    networks:
+      - app-net
+
+  # callisto postgres
+  postgres_ec_chain:
+    image: 192.168.0.79/metaearth/postgres:15
+    deploy:
+      replicas: 1
+    environment:
+      POSTGRES_USER: pguser # initial user
+      POSTGRES_PASSWORD: pgpassword # initial password
+      POSTGRES_DB: callisto-ec-chain # initial db
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - type: volume
+        source: ec-hub-db-data
+        target: /var/lib/postgresql/data # for data persistence
+    networks:
+      - app-net
+
+  # callisto-ec-chain:
+  #   image: 192.168.0.79/ec-chain/callisto-ec-chain:v0.0.2-rc6
+  #   deploy:
+  #     replicas: 1
+  #   networks:
+  #     - app-net
+  #   configs:
+  #     - source: ec-chain-cfg
+  #       target: /.callisto/config.yaml
+  #   depends_on:
+  #     - postgres_ec_chain
+  #   entrypoint: ["callisto", "start", "--home", "/.callisto"]
+
+  # jaeger:
+  #   image: 192.168.0.79/metaearth/jaeger:2.1.0
+  #   deploy:
+  #     replicas: 1
+  #   ports:
+  #     - "16686:16686"
+  #     - "4317:4317"
+  #     - "4318:4318"
+  #     - "5778:5778"
+  #     - "9411:9411"
+  #   networks:
+  #     - app-net
+
+# Manage hot loading configs by the docker NFS volume
+volumes:
+  pgdata: # for data persistence
+  ec-hub-db-data: # for me-hub data persistence
+
+# Manage configs by the docker config
+configs:
+  ec-chain-cfg:
+    file: cluster-config/ec-home/config.yaml
+  scan-cfg:
+    file: cluster-config/scan-cfg/config.yaml
+  scan-proxy-api:
+    file: cluster-config/scan-cfg/apis.json
+
+networks:
+  app-net:
+    driver: overlay
+    attachable: true

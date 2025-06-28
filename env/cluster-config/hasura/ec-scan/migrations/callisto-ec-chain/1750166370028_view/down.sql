@@ -1,0 +1,9 @@
+drop VIEW if exists public.transfer_in_msgs_split_uec_coin_view;
+drop VIEW if exists public.amount_in_tx_view;
+drop VIEW if exists public.raw_block_log_view;
+drop VIEW if exists public.block_gas_fee;
+drop VIEW if exists public.validator_weight_view;
+drop VIEW if exists public.module_account_transfers;
+drop VIEW if exists public.transfer_combine_view;
+DROP VIEW if exists public.asset_change_logs_view;
+DROP FUNCTION if exists public.format_big_int_coin(_big_int_coin);
