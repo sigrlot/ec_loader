@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS public.transaction_p0 PARTITION OF public.transaction
 VALUES IN (0);
 CREATE TABLE IF NOT EXISTS public.message_p0 PARTITION OF public.message FOR
 VALUES IN (0);
-
 -- Insert records into message_type table
 INSERT INTO public.message_type (
         "type",
@@ -162,7 +161,7 @@ VALUES (
 INSERT INTO public."validator" (consensus_address, consensus_pubkey)
 VALUES (
         'ecvalcons1e66y0rtg2gudksttfss4nlaxuz7xlndeul4j83',
-        'PubKeyEd25519{FC476046453E1C29B9642B54F3DFAC316F004BABA1214B13758800BBC038F178}'
+        'ecvalconspub1e66y0rtg2gudksttfss4nlaxuz7xlndeul4j83e66y0rtg2gudksttfss4nlaxuz7xlndeul4j83'
     ),
     (
         'ecvalcons1w0r2za3jga74mj357nrfdm9jn4plwdmpwu9pun',
