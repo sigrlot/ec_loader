@@ -1,3 +1,9 @@
+TRUNCATE TABLE public.balance_states CASCADE;
+TRUNCATE TABLE public.block CASCADE;
+TRUNCATE TABLE public."transaction" CASCADE;
+TRUNCATE TABLE public.message CASCADE;
+TRUNCATE TABLE public.parsed_message CASCADE;
+TRUNCATE TABLE public.transfer_in_msgs CASCADE;
 -- Insert records into balance_states table
 DELETE FROM public.balance_states;
 INSERT INTO public.balance_states (
@@ -16,7 +22,7 @@ SELECT 'ec1' || substr(md5(random()::text || i::text), 1, 28) || lpad(i::text, 1
     '{uec}'::_text as token_types,
     NULL as region_id,
     (random() * 3)::int8 as account_types
-FROM generate_series(1, 10000) as i ON CONFLICT DO NOTHING;
+FROM generate_series(1, 500000) as i ON CONFLICT DO NOTHING;
 -- Insert records into block table
 DELETE FROM public.block;
 WITH counter AS (
@@ -44,7 +50,7 @@ SELECT i as height,
         LIMIT 1
     ) as proposer_address,
     NOW() - (random() * interval '365 days') as "timestamp"
-FROM generate_series(1, 10000) as i ON CONFLICT DO NOTHING;
+FROM generate_series(1, 1000000) as i ON CONFLICT DO NOTHING;
 -- Insert records into transaction table
 DELETE FROM public.transaction;
 WITH block_count AS (
@@ -94,7 +100,7 @@ SELECT encode(sha256(('tx_' || i::text)::bytea), 'hex') as hash,
     'raw_log_' || i::text as raw_log,
     NULL as logs,
     0 as partition_id
-FROM generate_series(1, 10000) as i ON CONFLICT DO NOTHING;
+FROM generate_series(1, 1000000) as i ON CONFLICT DO NOTHING;
 -- Insert 200,000 records into message table
 DELETE FROM public.message;
 WITH tx_count AS (
@@ -155,7 +161,7 @@ SELECT (
             )
         LIMIT 1
     ) AS height
-FROM generate_series(1, 2000) AS i ON CONFLICT DO NOTHING;
+FROM generate_series(1, 2000000) AS i ON CONFLICT DO NOTHING;
 -- Insert 200,000 records into parsed_message table
 DELETE FROM public.parsed_message;
 WITH message_count AS (
@@ -176,7 +182,7 @@ SELECT m.height,
     '{}' as detail,
     m."type" as msg_type,
     'Description for message ' || i::text as description
-FROM generate_series(1, 200000) as i
+FROM generate_series(1, 2000000) as i
     CROSS JOIN LATERAL (
         SELECT height,
             transaction_hash,
@@ -188,6 +194,106 @@ FROM generate_series(1, 200000) as i
             )
         LIMIT 1
     ) m ON CONFLICT DO NOTHING;
+-- Insert records into fee_records table
+DELETE FROM public.fee_records;
+WITH tx_count AS (
+    SELECT count(*) AS n
+    FROM public."transaction"
+) --address_count AS (
+--    SELECT count(*) AS n
+--    FROM public.balance_states
+--)
+INSERT INTO public.fee_records (
+        created_at,
+        updated_at,
+        deleted_at,
+        height,
+        tx_hash,
+        fee_payer,
+        fee_amount,
+        fee_denom,
+        invoke_address,
+        receivers,
+        partition_id
+    )
+SELECT NOW() - (random() * interval '365 days') as created_at,
+    NOW() - (random() * interval '365 days') as updated_at,
+    NULL as deleted_at,
+    (
+        SELECT height
+        FROM public.transaction OFFSET i % (
+                SELECT n
+                FROM tx_count
+            )
+        LIMIT 1
+    ) as height,
+    (
+        SELECT hash
+        FROM public.transaction OFFSET i % (
+                SELECT n
+                FROM tx_count
+            )
+        LIMIT 1
+    ) as tx_hash,
+    --    (
+    --        SELECT address
+    --        FROM public.balance_states OFFSET i % (
+    --                SELECT n
+    --                FROM address_count
+    --            )
+    --        LIMIT 1
+    --    ) as fee_payer,
+    NULL as fee_payer,
+    (random() * 100000)::int8 as fee_amount,
+    'uec' as fee_denom,
+    --    (
+    --        SELECT ARRAY(
+    --                SELECT address
+    --                FROM public.balance_states OFFSET (i * 3 + j) % (
+    --                        SELECT n
+    --                        FROM address_count
+    --                    )
+    --                LIMIT 1
+    --                FROM generate_series(0, (1 + (random() * 3)::int) - 1) as j
+    --            )
+    --    ) as invoke_address,
+    NULL as invoke_address,
+    NULL as receivers,
+    0 as partition_id
+FROM generate_series(1, 100000) as i ON CONFLICT DO NOTHING;
+-- Insert records into stake_ec_statics table
+DELETE FROM public.stake_ec_statics;
+WITH address_count AS (
+    SELECT count(*) AS n
+    FROM public.balance_states
+),
+block_count AS (
+    SELECT count(*) AS n
+    FROM public.block
+)
+INSERT INTO public.stake_ec_statics (
+        staker_address,
+        amount,
+        block_height
+    )
+SELECT (
+        SELECT address
+        FROM public.balance_states OFFSET i % (
+                SELECT n
+                FROM address_count
+            )
+        LIMIT 1
+    ) as staker_address,
+    (random() * 1000000)::int8 as amount,
+    (
+        SELECT height
+        FROM public.block OFFSET i % (
+                SELECT n
+                FROM block_count
+            )
+        LIMIT 1
+    ) as block_height
+FROM generate_series(1, 100000) as i ON CONFLICT DO NOTHING;
 -- Insert records into transfer_in_msgs table
 DELETE FROM public.transfer_in_msgs;
 WITH message_count AS (
@@ -224,7 +330,7 @@ SELECT NOW() - (random() * interval '365 days') as created_at,
     '{uec}'::_text as token_types,
     (m."index" % 5 = 0)::bool as has_ibc_token,
     'tag_' || (m."index" % 100)::text as tag
-FROM generate_series(1, 4000) as i
+FROM generate_series(1, 4000000) as i
     CROSS JOIN LATERAL (
         SELECT transaction_hash,
             height,
