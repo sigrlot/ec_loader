@@ -48,7 +48,11 @@ total INTEGER := 1000000;
 i INTEGER := 1;
 arr_validator text [];
 n INTEGER;
-SELECT array_agg(consensus_address) INTO arr_validator
+BEGIN
+SELECT array_agg(
+        consensus_address
+        ORDER BY consensus_address
+    ) INTO arr_validator
 FROM public.validator_info;
 n := array_length(arr_validator, 1);
 WHILE i <= total LOOP
@@ -84,9 +88,12 @@ total INTEGER := 1000000;
 i INTEGER := 1;
 arr_block int8 [];
 n INTEGER;
-SELECT array_agg(height) INTO arr_block
-FROM public.block
-ORDER BY height;
+BEGIN
+SELECT array_agg(
+        height
+        ORDER BY height
+    ) INTO arr_block
+FROM public.block;
 n := array_length(arr_block, 1);
 WHILE i <= total LOOP
 INSERT INTO public.transaction (
@@ -139,18 +146,33 @@ arr_addr text [];
 n_tx INTEGER;
 n_type INTEGER;
 n_addr INTEGER;
-SELECT array_agg(hash) INTO arr_tx
-FROM public.transaction
-ORDER BY hash;
-SELECT array_agg(type) INTO arr_type
-FROM public.message_type
-ORDER BY type;
-SELECT array_agg(address) INTO arr_addr
-FROM public.balance_states
-ORDER BY address;
+arr_block int8 [];
+n INTEGER;
+BEGIN
+SELECT array_agg(
+        hash
+        ORDER BY hash
+    ) INTO arr_tx
+FROM public.transaction;
+SELECT array_agg(
+        type
+        ORDER BY type
+    ) INTO arr_type
+FROM public.message_type;
+SELECT array_agg(
+        address
+        ORDER BY address
+    ) INTO arr_addr
+FROM public.balance_states;
+SELECT array_agg(
+        height
+        ORDER BY height
+    ) INTO arr_block
+FROM public.block;
 n_tx := array_length(arr_tx, 1);
 n_type := array_length(arr_type, 1);
 n_addr := array_length(arr_addr, 1);
+n := array_length(arr_block, 1);
 WHILE i <= total LOOP
 INSERT INTO public.message (
         transaction_hash,
@@ -242,12 +264,17 @@ i INTEGER := 1;
 arr_tx_height int8 [];
 arr_tx_hash text [];
 n_tx INTEGER;
-SELECT array_agg(height) INTO arr_tx_height
-FROM public.transaction
-ORDER BY height;
-SELECT array_agg(hash) INTO arr_tx_hash
-FROM public.transaction
-ORDER BY height;
+BEGIN
+SELECT array_agg(
+        height
+        ORDER BY height
+    ),
+    array_agg(
+        hash
+        ORDER BY height
+    ) INTO arr_tx_height,
+    arr_tx_hash
+FROM public.transaction;
 n_tx := array_length(arr_tx_height, 1);
 WHILE i <= total LOOP
 INSERT INTO public.fee_records (
@@ -291,12 +318,17 @@ arr_addr text [];
 arr_block int8 [];
 n_addr INTEGER;
 n_block INTEGER;
-SELECT array_agg(address) INTO arr_addr
-FROM public.balance_states
-ORDER BY address;
-SELECT array_agg(height) INTO arr_block
-FROM public.block
-ORDER BY height;
+BEGIN
+SELECT array_agg(
+        address
+        ORDER BY address
+    ) INTO arr_addr
+FROM public.balance_states;
+SELECT array_agg(
+        height
+        ORDER BY height
+    ) INTO arr_block
+FROM public.block;
 n_addr := array_length(arr_addr, 1);
 n_block := array_length(arr_block, 1);
 WHILE i <= total LOOP
@@ -319,7 +351,7 @@ END $$;
 DELETE FROM public.transfer_in_msgs;
 DO $$
 DECLARE batch_size INTEGER := 10000;
-total INTEGER := 4000000;
+total INTEGER := 800000;
 i INTEGER := 1;
 arr_msg_tx text [];
 arr_msg_height int8 [];
@@ -327,7 +359,7 @@ arr_msg_index int [];
 arr_msg_type text [];
 arr_msg_addr text [] [];
 n INTEGER;
--- 合并为一次查询
+BEGIN -- 先聚合一维数据
 SELECT array_agg(
         transaction_hash
         ORDER BY height
@@ -343,16 +375,23 @@ SELECT array_agg(
     array_agg(
         "type"
         ORDER BY height
-    ),
-    array_agg(
-        involved_accounts_addresses
-        ORDER BY height
     ) INTO arr_msg_tx,
     arr_msg_height,
     arr_msg_index,
-    arr_msg_type,
-    arr_msg_addr
+    arr_msg_type
 FROM public.message;
+-- 用子查询聚合二维数组，确保所有 involved_accounts_addresses 维度一致
+-- 过滤掉 NULL，补齐空数组为 '{}'::text[]，保证维度一致
+SELECT array_agg(
+        COALESCE(t.involved_accounts_addresses, ARRAY []::text [])
+        ORDER BY t.height
+    ) INTO arr_msg_addr
+FROM (
+        SELECT involved_accounts_addresses,
+            height
+        FROM public.message
+        ORDER BY height
+    ) t;
 n := array_length(arr_msg_tx, 1);
 WHILE i <= total LOOP
 INSERT INTO public.transfer_in_msgs (
