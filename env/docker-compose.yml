@@ -86,14 +86,24 @@ services:
       POSTGRES_USER: pguser # initial user
       POSTGRES_PASSWORD: pgpassword # initial password
       POSTGRES_DB: callisto-ec-chain # initial db
-
     ports:
       - "5433:5432"
-
     volumes:
       - type: volume
         source: ec-hub-db-data
         target: /var/lib/postgresql/data # for data persistence
+    command:
+      - postgres
+      - -c
+      - work_mem=64MB
+      - -c
+      - maintenance_work_mem=1GB
+      - -c
+      - shared_buffers=8GB
+      - -c
+      - effective_cache_size=16GB
+      - -c
+      - wal_buffers=16MB
     networks:
       - app-net
 
