@@ -82,7 +82,7 @@ VALUES (
 -- Insert records into module_accounts table
 INSERT INTO public.module_accounts (
         address,
-        "name",
+        name,
         account_type,
         description,
         region_id
@@ -156,6 +156,76 @@ VALUES (
         '/cosmos.auth.v1beta1.ModuleAccount',
         '',
         NULL
+    ),
+    (
+        'ec1exzjz48c96s5frhz5sm9a7pdk2zytmg8gvkfdv',
+        'reward_token_pool',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1fr0pwr5wyrkhhnzywmyya4uedn7spajxxyd5g5',
+        'gov_fund_pool',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1pptnwgcumxpqdfk5wr0k7x53syvc5j72hx2px9',
+        'denommetadata',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec144en06tkpj7usms3pgzndcpudf83qfksg43cdy',
+        'eibc',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec17xpfvakm2amg962yls6f84z3kell8c5lm3gxff',
+        'fee_collector',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1hmmq6k63kpuy07pzws750gyq8kkrd893970y7h',
+        'evm_vfc_deployer',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1yl6hdjhmkf37639730gffanpzndzdpmh9ha04h',
+        'transfer',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1vqu8rska6swzdmnhf90zuv0xmelej4lqx6wjku',
+        'evm',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec1tygms3xhhs3yv487phx3dw4a95jn7t7l2n7cdh',
+        'not_bonded_tokens_pool',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
+    ),
+    (
+        'ec10d07y265gmmuvt4z0w9aw880jnsr700j32cr58',
+        'gov',
+        '/cosmos.auth.v1beta1.ModuleAccount',
+        '',
+        NULL
     );
 -- Insert records into balance_states table
 INSERT INTO public.balance_states (
@@ -168,94 +238,40 @@ INSERT INTO public.balance_states (
         account_types
     )
 VALUES (
-        'ec1mk7pw34ypusacm29m92zshgxee3yreumfj6vme',
-        '{"(uec,6377254906)"}',
-        2870951557,
-        53575,
-        '{uec}',
-        NULL,
-        0
-    ),
-    (
-        'ec1fl48vsnmsdzcv85q5d2q4z5ajdha8yu37nzfmr',
-        '{"(uec,5987079202)"}',
-        3110986307,
-        70257,
-        '{uec}',
-        NULL,
-        2
-    ),
-    (
-        'ec14gcccn42ucahkf32nkug0t284y78hrmx3qfvl8',
-        '{"(uec,9564733172)"}',
-        3030697784,
-        92759,
-        '{uec}',
-        NULL,
-        2
-    ),
-    (
-        'ec1h3j5kq3efj96ga8gre6pxmp2qmfvs994e7sgqs',
-        '{"(uec,4494242396)"}',
-        5367383159,
-        26865,
-        '{uec}',
-        NULL,
-        0
-    ),
-    (
         'ec136dew87j9gguzc3u8d2wp8p6wqgw5jz7p7jyjs',
-        '{"(uec,39573120350000000000)"}',
-        6775803657,
+        '{"(uec,39573120350000000)"}',
+        39573120350000000,
         30965,
         '{uec}',
         NULL,
         2
     ),
     (
-        'ec1vwr8z00ty7mqnk4dtchr9mn9j96nuh6wjk37kq',
-        '{"(uec,9813093276)"}',
-        238779460,
-        69301,
-        '{uec}',
-        NULL,
-        3
-    ),
-    (
-        'ec1w6qn6k7cum32mujh8rjf07yupj4qcgczu6egs6',
-        '{"(uec,7697932387)"}',
-        4805511884,
-        57562,
+        'ec1gmpxkchcdgfq995zye5efwzfw86zfa4vqaal9u',
+        '{"(uec,13145893000000000)"}',
+        13145893000000000,
+        75013,
         '{uec}',
         NULL,
         2
     ),
     (
-        'ec1g920yuxdmqtfxg4w8a0j9sgaazfryr2cd8xckq',
-        '{"(uec,9019795804)"}',
-        6772210645,
-        86872,
-        '{uec}',
-        NULL,
-        0
-    ),
-    (
-        'ec13khtvp20yphkmc2uc43tmsngswh88al73xu2yw',
-        '{"(uec,4954810324)"}',
-        2125363640,
+        'ec1exzjz48c96s5frhz5sm9a7pdk2zytmg8gvkfdv',
+        '{"(uec,4954810324000000)"}',
+        4954810324000000,
         96211,
         '{uec}',
         NULL,
         2
     ),
     (
-        'ec1gmpxkchcdgfq995zye5efwzfw86zfa4vqaal9u',
-        '{"(uec,131458930000000000)"}',
-        3003788026,
-        75013,
+        'ec1fr0pwr5wyrkhhnzywmyya4uedn7spajxxyd5g5',
+        '{"(uec,2013010131000000)"}',
+        2013010131000000,
+        65488,
         '{uec}',
         NULL,
-        3
+        2
     );
 -- Insert records into validator table
 INSERT INTO public."validator" (consensus_address, consensus_pubkey)

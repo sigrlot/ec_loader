@@ -7,6 +7,8 @@ TRUNCATE TABLE public."transaction" CASCADE;
 TRUNCATE TABLE public.message CASCADE;
 TRUNCATE TABLE public.parsed_message CASCADE;
 TRUNCATE TABLE public.fee_records CASCADE;
+TRUNCATE TABLE public.settlements CASCADE;
+TRUNCATE TABLE public.stake_info_records CASCADE;
 TRUNCATE TABLE public.stake_ec_statics CASCADE;
 TRUNCATE TABLE public.transfer_in_msgs CASCADE;
 -- Insert records into balance_states table
@@ -303,6 +305,109 @@ SELECT NOW() - (random() * interval '365 days') as created_at,
     0 as partition_id
 FROM generate_series(1, LEAST(batch_size, total - i + 1)) as j ON CONFLICT DO NOTHING;
 RAISE NOTICE 'fee_records: Inserted % rows at %',
+LEAST(i + batch_size - 1, total),
+clock_timestamp();
+i := i + batch_size;
+END LOOP;
+END $$;
+-- Insert records into settlements table
+DELETE FROM public.settlements;
+DO $$
+DECLARE batch_size INTEGER := 10000;
+total INTEGER := 500000;
+i INTEGER := 1;
+arr_addr text [];
+arr_block int8 [];
+n_addr INTEGER;
+n_block INTEGER;
+BEGIN
+SELECT array_agg(
+        address
+        ORDER BY address
+    ) INTO arr_addr
+FROM public.balance_states;
+SELECT array_agg(
+        height
+        ORDER BY height
+    ) INTO arr_block
+FROM public.block;
+n_addr := array_length(arr_addr, 1);
+n_block := array_length(arr_block, 1);
+WHILE i <= total LOOP
+INSERT INTO public.settlements (
+        created_at,
+        updated_at,
+        deleted_at,
+        block_height,
+        block_time,
+        staker_address,
+        reward_amount,
+        withdraw_able_amount,
+        stake_amount_after_settle
+    )
+SELECT NOW() - (random() * interval '365 days') as created_at,
+    NOW() - (random() * interval '365 days') as updated_at,
+    NULL as deleted_at,
+    arr_block [((i + j -1) % n_block) + 1] as block_height,
+    NOW() - (random() * interval '365 days') as block_time,
+    arr_addr [((i + j -1) % n_addr) + 1] as staker_address,
+    (random() * 10000000)::int8 as reward_amount,
+    (random() * 500000000)::int8 as withdraw_able_amount,
+    (random() * 1000000000)::int8 as stake_amount_after_settle
+FROM generate_series(1, LEAST(batch_size, total - i + 1)) as j ON CONFLICT DO NOTHING;
+RAISE NOTICE 'settlements: Inserted % rows at %',
+LEAST(i + batch_size - 1, total),
+clock_timestamp();
+i := i + batch_size;
+END LOOP;
+END $$;
+-- Insert records into stake_info_records table
+DELETE FROM public.stake_info_records;
+DO $$
+DECLARE batch_size INTEGER := 10000;
+total INTEGER := 1000000;
+i INTEGER := 1;
+arr_addr text [];
+arr_block int8 [];
+arr_tx text [];
+arr_msg_type text [] := ARRAY ['StakeEc', 'WithdrawEc', 'SettleRewards'];
+n_addr INTEGER;
+n_block INTEGER;
+n_tx INTEGER;
+BEGIN
+SELECT array_agg(
+        address
+        ORDER BY address
+    ) INTO arr_addr
+FROM public.balance_states;
+SELECT array_agg(
+        height
+        ORDER BY height
+    ) INTO arr_block
+FROM public.block;
+SELECT array_agg(
+        hash
+        ORDER BY hash
+    ) INTO arr_tx
+FROM public.transaction;
+n_addr := array_length(arr_addr, 1);
+n_block := array_length(arr_block, 1);
+n_tx := array_length(arr_tx, 1);
+WHILE i <= total LOOP
+INSERT INTO public.stake_info_records (
+        msg_type,
+        staker_address,
+        amount,
+        block_height,
+        tx_hash
+    )
+SELECT arr_msg_type [((i + j -1) % 3) + 1] as msg_type,
+    arr_addr [((i + j -1) % n_addr) + 1] as staker_address,
+    (random() * 1000000000)::int8 as amount,
+    arr_block [((i + j -1) % n_block) + 1] as block_height,
+    arr_tx [((i + j -1) % n_tx) + 1] as tx_hash
+FROM generate_series(1, LEAST(batch_size, total - i + 1)) as j ON CONFLICT DO NOTHING;
+RAISE NOTICE 'stake_info_records: Inserted % rows at %',
 LEAST(i + batch_size - 1, total),
 clock_timestamp();
 i := i + batch_size;
