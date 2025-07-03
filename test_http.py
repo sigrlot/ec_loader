@@ -1,16 +1,18 @@
 import random
+import logging
 
-from locust import TaskSet, task, HttpUser
+from locust import TaskSet, task, HttpUser, tag
 
-MAX_OFFSET = 0
-MAX_LIMIT = 30
-MAX_BLOCK_HEIGHT = 100000
+MAX_OFFSET = 9970
+MAX_LIMIT = 20
+MAX_BLOCK_HEIGHT = 600000
 
+logging.getLogger("locust.stats_logger").setLevel(logging.WARNING)
 
-def random_offset():
+def random_offset():    
     """获取随机偏移量"""
-    return 0
-    # return random.randint(0, MAX_OFFSET)
+    # return 0
+    return random.randint(0, MAX_OFFSET)
 
 def random_limit():
     """获取随机限制"""
@@ -51,6 +53,7 @@ class UserBehavior(TaskSet):
     # ===== PROTO API =====
 
     # Block API 接口测试
+    @tag('block_list')
     @task(0)
     def block_list(self):
         """区块列表"""
@@ -64,9 +67,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("block_list error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # Txs API 接口测试
+    @tag('tx_list')
     @task(0)
     def tx_list(self):
         """Hub交易列表"""
@@ -81,9 +85,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("hub_tx_list error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # Account API 接口测试
+    @tag('account_txs_get')
     @task(0)
     def account_txs_get(self):
         """账户交易列表 - GET"""
@@ -97,8 +102,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("account_txs_get error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('account_txs_post')
     @task(0)
     def account_txs_post(self):
         """账户交易列表 - POST"""
@@ -112,14 +118,15 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("account_txs_post error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('account_module_transfers')
     @task(0)
     def account_module_transfers(self):
         """模块转账记录"""
         params = {
             "address": random.choice(self.addresses),
-            "net_type": random.choice(["hub", "rollapp_checkin", ""]),
+            "net_type": "hub",
             "limit": str(random_limit()),
             "offset": str(random_offset()),
             "key": ""
@@ -129,8 +136,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("module_transfers error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('account_equity_info')
     @task(0)
     def account_equity_info(self):
         """用户权益信息"""
@@ -141,9 +149,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("address_equity_info error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
-    @task(0)
+    @tag('account_substitutable_equity')
+    @task(1)
     def account_substitutable_equity(self):
         """用户地址可置换权益"""
         address = random.choice(self.addresses)
@@ -152,26 +161,28 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("address_substitutable_equity error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
-    @task(0)
+    @tag('account_balance_states')
+    @task(1)
     def account_balance_states(self):
         """账户余额状态"""
         address = random.choice(self.addresses)
         params = {}
         # 随机添加可选参数
-        if random.choice([True, False]):
-            params["denom"] = "uec"
-        if random.choice([True, False]):
-            params["coin"] = "uec"
+        # if random.choice([True, False]):
+        #     params["denom"] = "uec"
+        # if random.choice([True, False]):
+        #     params["coin"] = "uec"
         
         url = f'{self.user.host}/api/account/balance-states/{address}'
         with self.client.get(url, params=params, catch_response=True) as response:
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("balance_states error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('public_address')
     @task(0)
     def public_address(self):
         """地址公示"""
@@ -180,12 +191,13 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("public_address error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
 
     # ===== HASURA 接口测试 =====
     
     # Home REST API
+    @tag('liquidity_info')
     @task(0)
     def home_liquidity_info(self):
         """流通量信息"""
@@ -194,9 +206,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_home_liquidity_info error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
-    @task(0)
+    @tag('query_exists')
+    @task(1)
     def home_query_exists(self):
         """查询key是否存在"""
         # 随机选择不同类型的key进行测试
@@ -216,20 +229,21 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_home_query_exists error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
 
+    @tag('block_detail_get')
     @task(0)
     def block_detail_get(self):
         """区块详情 (GET)"""
         rp = random.choice([True, False])
-        params = {"hash": random.choice(self.tx_hashes)} if rp else {"height": random_block_height()}
+        params = {"hash": random.choice(self.block_hashes)} if rp else {"height": random_block_height()}
         url = f'{self.user.host}/api/rest/block/detail'
         with self.client.get(url, params=params, catch_response=True) as response:
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_block_detail_get error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # @task(0)
     # def block_detail_post(self):
@@ -245,6 +259,7 @@ class UserBehavior(TaskSet):
     #         else:
     #             response.failure("rest_block_detail_post error")
 
+    @tag('block_raw_log')
     @task(0)
     def block_raw_log(self):
         """区块原始日志"""
@@ -256,8 +271,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_block_raw_log error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('block_txs')
     @task(0)
     def block_txs(self):
         """区块交易列表"""
@@ -271,8 +287,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_block_txs error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('block_module_transfers')
     @task(0)
     def block_module_transfers(self):
         """区块模块转账"""
@@ -286,9 +303,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_block_module_transfers error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # Transaction REST API
+    @tag('tx_detail')
     @task(0)
     def tx_detail(self):
         """交易详情"""
@@ -300,21 +318,22 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_tx_detail error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
 
-    @task(0)
-    def tx_detail_with_address_get(self):
-        """带地址的交易详情 (GET)"""
-        params = {
-            "hash": random.choice(self.tx_hashes) if self.tx_hashes else "test_hash"
-        }
-        url = f'{self.user.host}/api/rest/tx/detail_with_address'
-        with self.client.get(url, params=params, catch_response=True) as response:
-            if response.status_code == 200:
-                response.success()
-            else:
-                response.failure("rest_tx_detail_with_address_get error")
+    # @tag('tx_detail_with_address_get')
+    # @task(0)
+    # def tx_detail_with_address_get(self):
+    #     """带地址的交易详情 (GET)"""
+    #     params = {
+    #         "hash": random.choice(self.tx_hashes) if self.tx_hashes else "test_hash"
+    #     }
+    #     url = f'{self.user.host}/api/rest/tx/detail_with_address'
+    #     with self.client.get(url, params=params, catch_response=True) as response:
+    #         if response.status_code == 200:
+    #             response.success()
+    #         else:
+    #             response.failure(f"Error {response.status_code}: {response.text}")
 
     # @task(0)
     # def tx_detail_with_address_post(self):
@@ -330,6 +349,7 @@ class UserBehavior(TaskSet):
     #         else:
     #             response.failure("rest_tx_detail_with_address_post error")
 
+    @tag('tx_raw_log')
     @task(0)
     def tx_raw_log(self):
         """交易原始日志"""
@@ -341,8 +361,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_tx_raw_log error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('tx_asset_change_log')
     @task(0)
     def tx_asset_change_log(self):
         """交易资产变化日志"""
@@ -355,9 +376,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_tx_asset_change_log error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # Account REST API
+    @tag('account_module_addresses')
     @task(0)
     def account_module_addresses(self):
         """模块账户地址列表"""
@@ -366,8 +388,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_account_module_addresses error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('account_detail')
     @task(0)
     def account_detail(self):
         """账户详情"""
@@ -379,8 +402,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_account_detail error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('account_staking_records')
     @task(0)
     def account_staking_records(self):
         """账户权益变更记录"""
@@ -394,9 +418,10 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_account_staking_records error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
     # Validator REST API
+    @tag('validator_detail')
     @task(0)
     def validator_detail(self):
         """验证节点详情"""
@@ -408,8 +433,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_validator_detail error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('validator_statistic')
     @task(0)
     def validator_statistic(self):
         """验证节点统计"""
@@ -418,8 +444,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_validator_statistic error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
+    @tag('validator_blocks')
     @task(0)
     def validator_blocks(self):
         """验证节点区块列表"""
@@ -433,9 +460,9 @@ class UserBehavior(TaskSet):
             if response.status_code == 200:
                 response.success()
             else:
-                response.failure("rest_validator_blocks error")
+                response.failure(f"Error {response.status_code}: {response.text}")
 
 
 class WebsiteUser(HttpUser):
-    host = "http://192.168.0.73:8000"
+    host = "http://192.168.0.100:8000"
     tasks = [UserBehavior]

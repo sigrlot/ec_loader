@@ -16,5 +16,6 @@
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         }
-    ]
+    ],
+    "livePreview.defaultPreviewPath": "/test_report_2_2_10.html"
 }
