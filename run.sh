@@ -19,16 +19,20 @@ echo "安装依赖..."
 pip install -r requirements.txt
 
 # 检查数据文件
-if [ ! -f "data/hash.txt" ]; then
-    echo "警告: data/hash.txt 文件不存在，创建示例文件..."
-    mkdir -p data
-    echo -e "hash1\nhash2\nhash3" > data/hash.txt
+if [ ! -f "data/block_hash.txt" ]; then
+    echo "警告: data/block_hash.txt 文件不存在，请导出数据文件"
 fi
 
-if [ ! -f "data/addresses.txt" ]; then
-    echo "警告: data/addresses.txt 文件不存在，创建示例文件..."
-    mkdir -p data
-    echo -e "me1example1\nme1example2\nme1example3" > data/addresses.txt
+if [ ! -f "data/address.txt" ]; then
+    echo "警告: data/address.txt 文件不存在，请导出数据文件"
+fi
+
+if [ ! -f "data/tx_hash.txt" ]; then
+    echo "警告: data/tx_hash.txt 文件不存在，请导出数据文件"
+fi
+
+if [ ! -f "data/validator.txt" ]; then
+    echo "警告: data/validator.txt 文件不存在，请导出数据文件"
 fi
 
 echo "=== 启动选项 ==="

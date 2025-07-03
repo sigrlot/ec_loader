@@ -1,7 +1,11 @@
+注意：本次测试仅为通过性测试，未发现明显TPS性能瓶颈即视为测试通过，不代表该环境下的真实性能数据
+
 数据基础：50万地址，60万区块，50万质押信息/结算记录，100万质押记录，100万交易（交易/消息/转账记录），数据均匀分布
 测试环境：全本地（i7-14700 8核（超线程）+12核（单线程），32G内存）
 数据库配置：work_mem=64MB，maintenance_work_mem=1GB，shared_buffers=8GB，effective_cache_size=16GB，wal_buffers=16MB
+测试场景：用户数 20, 测试时间 60s
 
+测试结果：
 /api/block/blocklist    2977
 /api/txs/hub/list       2791
 /api/acc/account-txs    1825
