@@ -46,7 +46,7 @@ FROM public.balance_states;
 -- Insert records into block table
 DELETE FROM public.block;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 50000;
 total INTEGER := 1000000;
 i INTEGER := 1;
 arr_validator text [];
@@ -86,7 +86,7 @@ END $$;
 -- Insert records into transaction table
 DELETE FROM public.transaction;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 50000;
 total INTEGER := 1000000;
 i INTEGER := 1;
 arr_block int8 [];
@@ -140,7 +140,7 @@ END $$;
 -- Insert 200,000 records into message table
 DELETE FROM public.message;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 50000;
 total INTEGER := 2000000;
 i INTEGER := 1;
 arr_tx text [];
@@ -206,7 +206,7 @@ END $$;
 -- Insert records into parsed_message table
 DELETE FROM public.parsed_message;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 50000;
 total INTEGER := 2000000;
 i INTEGER := 1;
 arr_msg_height int8 [];
@@ -260,8 +260,8 @@ END $$;
 -- Insert records into fee_records table
 DELETE FROM public.fee_records;
 DO $$
-DECLARE batch_size INTEGER := 10000;
-total INTEGER := 100000;
+DECLARE batch_size INTEGER := 50000;
+total INTEGER := 1000000;
 i INTEGER := 1;
 arr_tx_height int8 [];
 arr_tx_hash text [];
@@ -313,7 +313,7 @@ END $$;
 -- Insert records into settlements table
 DELETE FROM public.settlements;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 20000;
 total INTEGER := 500000;
 i INTEGER := 1;
 arr_addr text [];
@@ -364,7 +364,7 @@ END $$;
 -- Insert records into stake_info_records table
 DELETE FROM public.stake_info_records;
 DO $$
-DECLARE batch_size INTEGER := 10000;
+DECLARE batch_size INTEGER := 50000;
 total INTEGER := 1000000;
 i INTEGER := 1;
 arr_addr text [];
@@ -416,8 +416,8 @@ END $$;
 -- Insert records into stake_ec_statics table
 DELETE FROM public.stake_ec_statics;
 DO $$
-DECLARE batch_size INTEGER := 10000;
-total INTEGER := 100000;
+DECLARE batch_size INTEGER := 50000;
+total INTEGER := 1000000;
 i INTEGER := 1;
 arr_addr text [];
 arr_block int8 [];
@@ -455,8 +455,8 @@ END $$;
 -- Insert records into transfer_in_msgs table
 DELETE FROM public.transfer_in_msgs;
 DO $$
-DECLARE batch_size INTEGER := 10000;
-total INTEGER := 800000;
+DECLARE batch_size INTEGER := 50000;
+total INTEGER := 1000000;
 i INTEGER := 1;
 arr_msg_tx text [];
 arr_msg_height int8 [];

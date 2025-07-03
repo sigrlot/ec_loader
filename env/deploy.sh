@@ -30,6 +30,7 @@ callisto init-db --home "$SCRIPT_DIR/cluster-config/ec-home"
 
 # apply the hasura metadata
 cd "$SCRIPT_DIR/cluster-config/hasura/ec-scan"
-hasura migrate apply --endpoint http://192.168.0.100:8080
-hasura metadata apply --endpoint http://192.168.0.100:8080
+hasura metadata apply --endpoint http://127.0.0.1:8080
+hasura migrate apply --endpoint http://127.0.0.1:8080
+hasura metadata apply --endpoint http://127.0.0.1:8080  # reapply to fix errors
 cd "$ORIGINAL_DIR"

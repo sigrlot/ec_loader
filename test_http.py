@@ -54,7 +54,7 @@ class UserBehavior(TaskSet):
 
     # Block API 接口测试
     @tag('block_list')
-    @task(0)
+    @task(1)
     def block_list(self):
         """区块列表"""
         params = {
@@ -71,7 +71,7 @@ class UserBehavior(TaskSet):
 
     # Txs API 接口测试
     @tag('tx_list')
-    @task(0)
+    @task(1)
     def tx_list(self):
         """Hub交易列表"""
         data = {
@@ -89,7 +89,7 @@ class UserBehavior(TaskSet):
 
     # Account API 接口测试
     @tag('account_txs_get')
-    @task(0)
+    @task(1)
     def account_txs_get(self):
         """账户交易列表 - GET"""
         address = random.choice(self.addresses)
@@ -104,24 +104,24 @@ class UserBehavior(TaskSet):
             else:
                 response.failure(f"Error {response.status_code}: {response.text}")
 
-    @tag('account_txs_post')
-    @task(0)
-    def account_txs_post(self):
-        """账户交易列表 - POST"""
-        data = {
-            "address": random.choice(self.addresses),
-            "offset": random_offset(),
-            "limit": random_limit()
-        }
-        url = f'{self.user.host}/api/acc/account-txs'
-        with self.client.post(url, json=data, catch_response=True) as response:
-            if response.status_code == 200:
-                response.success()
-            else:
-                response.failure(f"Error {response.status_code}: {response.text}")
+    # @tag('account_txs_post')
+    # @task(1)
+    # def account_txs_post(self):
+    #     """账户交易列表 - POST"""
+    #     data = {
+    #         "address": random.choice(self.addresses),
+    #         "offset": random_offset(),
+    #         "limit": random_limit()
+    #     }
+    #     url = f'{self.user.host}/api/acc/account-txs'
+    #     with self.client.post(url, json=data, catch_response=True) as response:
+    #         if response.status_code == 200:
+    #             response.success()
+    #         else:
+    #             response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('account_module_transfers')
-    @task(0)
+    @task(1)
     def account_module_transfers(self):
         """模块转账记录"""
         params = {
@@ -139,7 +139,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('account_equity_info')
-    @task(0)
+    @task(1)
     def account_equity_info(self):
         """用户权益信息"""
         address = random.choice(self.addresses)
@@ -183,7 +183,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('public_address')
-    @task(0)
+    @task(1)
     def public_address(self):
         """地址公示"""
         url = f'{self.user.host}/api/account/public_address'
@@ -198,7 +198,7 @@ class UserBehavior(TaskSet):
     
     # Home REST API
     @tag('liquidity_info')
-    @task(0)
+    @task(1)
     def home_liquidity_info(self):
         """流通量信息"""
         url = f'{self.user.host}/api/rest/home/liquidity_info'
@@ -233,7 +233,7 @@ class UserBehavior(TaskSet):
 
 
     @tag('block_detail_get')
-    @task(0)
+    @task(1)
     def block_detail_get(self):
         """区块详情 (GET)"""
         rp = random.choice([True, False])
@@ -245,7 +245,7 @@ class UserBehavior(TaskSet):
             else:
                 response.failure(f"Error {response.status_code}: {response.text}")
 
-    # @task(0)
+    # @task(1)
     # def block_detail_post(self):
     #     """区块详情 (POST)"""
     #     data = {
@@ -260,7 +260,7 @@ class UserBehavior(TaskSet):
     #             response.failure("rest_block_detail_post error")
 
     @tag('block_raw_log')
-    @task(0)
+    @task(1)
     def block_raw_log(self):
         """区块原始日志"""
         data = {
@@ -274,7 +274,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('block_txs')
-    @task(0)
+    @task(1)
     def block_txs(self):
         """区块交易列表"""
         data = {
@@ -290,7 +290,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('block_module_transfers')
-    @task(0)
+    @task(1)
     def block_module_transfers(self):
         """区块模块转账"""
         data = {
@@ -307,7 +307,7 @@ class UserBehavior(TaskSet):
 
     # Transaction REST API
     @tag('tx_detail')
-    @task(0)
+    @task(1)
     def tx_detail(self):
         """交易详情"""
         params = {
@@ -322,7 +322,7 @@ class UserBehavior(TaskSet):
 
 
     # @tag('tx_detail_with_address_get')
-    # @task(0)
+    # @task(1)
     # def tx_detail_with_address_get(self):
     #     """带地址的交易详情 (GET)"""
     #     params = {
@@ -335,7 +335,7 @@ class UserBehavior(TaskSet):
     #         else:
     #             response.failure(f"Error {response.status_code}: {response.text}")
 
-    # @task(0)
+    # @task(1)
     # def tx_detail_with_address_post(self):
     #     """带地址的交易详情 (POST)"""
     #     data = {
@@ -350,7 +350,7 @@ class UserBehavior(TaskSet):
     #             response.failure("rest_tx_detail_with_address_post error")
 
     @tag('tx_raw_log')
-    @task(0)
+    @task(1)
     def tx_raw_log(self):
         """交易原始日志"""
         params = {
@@ -364,7 +364,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('tx_asset_change_log')
-    @task(0)
+    @task(1)
     def tx_asset_change_log(self):
         """交易资产变化日志"""
         params = {
@@ -380,7 +380,7 @@ class UserBehavior(TaskSet):
 
     # Account REST API
     @tag('account_module_addresses')
-    @task(0)
+    @task(1)
     def account_module_addresses(self):
         """模块账户地址列表"""
         url = f'{self.user.host}/api/rest/account/module/addresses'
@@ -391,7 +391,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('account_detail')
-    @task(0)
+    @task(1)
     def account_detail(self):
         """账户详情"""
         params = {
@@ -405,7 +405,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('account_staking_records')
-    @task(0)
+    @task(1)
     def account_staking_records(self):
         """账户权益变更记录"""
         params = {
@@ -422,7 +422,7 @@ class UserBehavior(TaskSet):
 
     # Validator REST API
     @tag('validator_detail')
-    @task(0)
+    @task(1)
     def validator_detail(self):
         """验证节点详情"""
         params = {
@@ -436,7 +436,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('validator_statistic')
-    @task(0)
+    @task(1)
     def validator_statistic(self):
         """验证节点统计"""
         url = f'{self.user.host}/api/rest/validator/statistic'
@@ -447,7 +447,7 @@ class UserBehavior(TaskSet):
                 response.failure(f"Error {response.status_code}: {response.text}")
 
     @tag('validator_blocks')
-    @task(0)
+    @task(1)
     def validator_blocks(self):
         """验证节点区块列表"""
         params = {

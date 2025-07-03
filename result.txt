@@ -1,4 +1,4 @@
-数据基础：50万地址，50万质押信息（总额/质押记录/结算记录），60万区块，80万交易（交易/消息/消息转账），数据均匀分布
+数据基础：50万地址，60万区块，50万质押信息/结算记录，100万质押记录，100万交易（交易/消息/转账记录），数据均匀分布
 测试环境：全本地（i7-14700 8核（超线程）+12核（单线程），32G内存）
 数据库配置：work_mem=64MB，maintenance_work_mem=1GB，shared_buffers=8GB，effective_cache_size=16GB，wal_buffers=16MB
 
@@ -6,7 +6,7 @@
 /api/txs/hub/list       2791
 /api/acc/account-txs    1825
 /api/acc/module-transfers   1645
-/api/account/address-equity-info    2459    // 需要增加数据重测
+/api/account/address-equity-info    2719
 /api/account/address-substitutable-equity    2648
 /api/account/balance-states     2686
 /api/account/public_address     3760
@@ -14,9 +14,9 @@
 /api/rest/home/query_exists     3511
 /api/rest/block/detail          2423
 /api/rest/block/raw_log         2842
-/api/rest/block/txs             2981    // 注意：构造数据不完全合适：区块下交易数量较少
+/api/rest/block/txs             2981    // 注意：区块下交易数量较少，未完全模拟线上情况
 /api/rest/block/module/transfers    2724
-/api/rest/tx/detail     600     // 错误率：0.2%，{"code":"unexpected","reason":"database query error","message":null}
+/api/rest/tx/detail     600     // 偶发错误率0.2%，请在压测环境再次观测。  ERROR：{"code":"unexpected","reason":"database query error","message":null}
 /api/rest/tx/raw_log    2393
 /api/rest/tx/asset_change_log   2116
 /api/rest/account/module/addresses  3502
