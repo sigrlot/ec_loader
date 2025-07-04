@@ -214,6 +214,7 @@ arr_msg_tx text [];
 arr_msg_index int [];
 arr_msg_type text [];
 n INTEGER;
+BEGIN
 SELECT array_agg(
         height
         ORDER BY height
@@ -244,12 +245,12 @@ INSERT INTO public.parsed_message (
         msg_type,
         description
     )
-SELECT arr_msg_height [((i + j -1) % n) + 1],
-    arr_msg_tx [((i + j -1) % n) + 1],
-    arr_msg_index [((i + j -1) % n) + 1],
+SELECT arr_msg_height [((i + j - 1) % n) + 1],
+    arr_msg_tx [((i + j - 1) % n) + 1],
+    arr_msg_index [((i + j - 1) % n) + 1],
     '{}' as detail,
-    arr_msg_type [((i + j -1) % n) + 1],
-    'Description for message ' || (i + j -1)::text as description
+    arr_msg_type [((i + j - 1) % n) + 1],
+    'Description for message ' || (i + j - 1)::text as description
 FROM generate_series(1, LEAST(batch_size, total - i + 1)) as j ON CONFLICT DO NOTHING;
 RAISE NOTICE 'parsed_message: Inserted % rows at %',
 LEAST(i + batch_size - 1, total),
@@ -456,13 +457,15 @@ END $$;
 DELETE FROM public.transfer_in_msgs;
 DO $$
 DECLARE batch_size INTEGER := 50000;
-total INTEGER := 1000000;
+total INTEGER := 2000000;
 i INTEGER := 1;
 arr_msg_tx text [];
 arr_msg_height int8 [];
 arr_msg_index int [];
 arr_msg_type text [];
-arr_msg_addr text [];
+arr_sender text [];
+arr_receiver text [];
+arr_invoke_address text [];
 n INTEGER;
 BEGIN
 SELECT array_agg(
@@ -480,25 +483,35 @@ SELECT array_agg(
     array_agg(
         "type"
         ORDER BY height
+    ),
+    array_agg(
+        CASE
+            WHEN array_length(involved_accounts_addresses, 1) >= 1 THEN involved_accounts_addresses [1]
+            ELSE NULL
+        END
+        ORDER BY height
+    ),
+    array_agg(
+        CASE
+            WHEN array_length(involved_accounts_addresses, 1) >= 2 THEN involved_accounts_addresses [2]
+            ELSE NULL
+        END
+        ORDER BY height
+    ),
+    array_agg(
+        COALESCE(
+            array_to_string(involved_accounts_addresses, ','),
+            ''
+        )
+        ORDER BY height
     ) INTO arr_msg_tx,
     arr_msg_height,
     arr_msg_index,
-    arr_msg_type
+    arr_msg_type,
+    arr_sender,
+    arr_receiver,
+    arr_invoke_address
 FROM public.message;
--- 将数组转换为字符串形式存储
-SELECT array_agg(
-        COALESCE(
-            array_to_string(t.involved_accounts_addresses, ','),
-            '{}'
-        )
-        ORDER BY t.height
-    ) INTO arr_msg_addr
-FROM (
-        SELECT involved_accounts_addresses,
-            height
-        FROM public.message
-        ORDER BY height
-    ) t;
 n := array_length(arr_msg_tx, 1);
 WHILE i <= total LOOP
 INSERT INTO public.transfer_in_msgs (
@@ -520,39 +533,25 @@ INSERT INTO public.transfer_in_msgs (
 SELECT NOW() - (random() * interval '365 days'),
     NOW() - (random() * interval '365 days'),
     NULL,
-    arr_msg_tx [((i + j -1) % n) + 1],
-    arr_msg_height [((i + j -1) % n) + 1],
-    arr_msg_index [((i + j -1) % n) + 1],
-    arr_msg_type [((i + j -1) % n) + 1],
-    -- 从字符串转换回数组并取元素
-    (
-        CASE
-            WHEN arr_msg_addr [((i + j -1) % n) + 1] = '{}' THEN NULL
-            ELSE (
-                string_to_array(arr_msg_addr [((i + j -1) % n) + 1], ',')
-            ) [1]
-        END
-    ),
-    (
-        CASE
-            WHEN arr_msg_addr [((i + j -1) % n) + 1] = '{}' THEN NULL
-            ELSE (
-                string_to_array(arr_msg_addr [((i + j -1) % n) + 1], ',')
-            ) [2]
-        END
-    ),
-    (
-        CASE
-            WHEN arr_msg_addr [((i + j -1) % n) + 1] = '{}' THEN ARRAY []::text []
-            ELSE string_to_array(arr_msg_addr [((i + j -1) % n) + 1], ',')
-        END
-    ),
+    arr_msg_tx [idx],
+    arr_msg_height [idx],
+    arr_msg_index [idx],
+    arr_msg_type [idx],
+    arr_sender [idx],
+    arr_receiver [idx],
+    CASE
+        WHEN arr_invoke_address [idx] = '' THEN ARRAY []::text []
+        ELSE string_to_array(arr_invoke_address [idx], ',')
+    END,
     (random() * 100000000)::int::text,
     '{uec}'::text [],
-    (arr_msg_index [((i + j -1) % n) + 1] % 5 = 0)::bool,
-    'tag_' || (arr_msg_index [((i + j -1) % n) + 1] % 100)::text
-FROM generate_series(1, LEAST(batch_size, total - i + 1)) as j ON CONFLICT DO NOTHING;
-RAISE NOTICE 'transfer_in_msgs: Inserted % rows at %',
+    (arr_msg_index [idx] % 5 = 0),
+    'tag_' || (arr_msg_index [idx] % 100)::text
+FROM generate_series(i, LEAST(i + batch_size - 1, total)) AS j,
+    LATERAL (
+        SELECT ((j - 1) % n) + 1 AS idx
+    ) s ON CONFLICT DO NOTHING;
+RAISE NOTICE 'Inserted up to row % at %',
 LEAST(i + batch_size - 1, total),
 clock_timestamp();
 i := i + batch_size;
